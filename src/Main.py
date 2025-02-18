@@ -12,8 +12,6 @@ class TimeManager:
         self.root.resizable(False,False)
 
         self.user = ""
-        print("hello")
-        print("hello2")
 
 
         # --- Home Screen ---
