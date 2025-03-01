@@ -7,7 +7,8 @@ from Visibility import Show
 from datetime import datetime
 from PIL import Image, ImageTk # pillow
 import tkinter as tk
-import sqlite3
+#import tkcalendar import Calendar
+
 
 class TimeManager:
     def __init__(self, root):
@@ -138,7 +139,7 @@ class TimeManager:
 
         Show.show_login(self)
         self.update_time()
-        self.Driver()
+        Database_Driver.Driver(self)
 
     # background tasks
 
@@ -168,9 +169,6 @@ class TimeManager:
 
 
         #Database Connection
-    def Driver(self):
-        self.conn = sqlite3.connect("TaskManager.db")
-        self.cursor = self.conn.cursor()
 
     # event  handlers
     def login(self):
@@ -182,7 +180,7 @@ class TimeManager:
         self.cursor.execute("SELECT * FROM User WHERE Email = ?", (user_input,))
         try:
             result = self.cursor.fetchone()
-            if result and result[3] == self.txt_password_ln.get().strip():
+            if result and result[3] == self.txt_password_ln.get():
                 self.user = result
                 Show.show_home(self)
             else:
@@ -193,6 +191,9 @@ class TimeManager:
     def create_account(self):
         if hasattr(self, 'lbl_create_account_fail'):
             self.lbl_create_account_fail.destroy()
+        name = self.txt_name.get("1.0", "end-1c")
+        email = self.txt_email_ca.get("1.0", "end-1c")
+        passowrd = self.txt_password_ca.get()
 
     def show_create_account_fail_message(self):
         if hasattr(self, 'lbl_create_account_fail'):

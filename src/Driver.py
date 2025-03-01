@@ -1,3 +1,5 @@
-
+import sqlite3
 class Database_Driver:
-    print("hello")
+    def Driver(self):
+        self.conn = sqlite3.connect("TaskManager.db")
+        self.cursor = self.conn.cursor()
