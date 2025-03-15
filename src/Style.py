@@ -5,10 +5,15 @@ class UIStyle:
         "fg": "#ECF0F1",
         "primary": "#27AE60",
         "secondary": "#2980B9",
-        "danger": "#E74C3C",
+        "danger": "#E74C3C", ##E74C3C
         "input_bg": "#FFFFFF",
         "input_fg": "#333333",
-        "border": "#BDC3C7"
+        "border": "#BDC3C7",
+        "calendar_bg": "#34495E",
+        "calendar_header_bg": "#2C3E50",
+        "calendar_selected_bg": "#E74C3C",
+        "calendar_border": "#1ABC9C"
+
     }
 
     FONTS = {
@@ -16,14 +21,15 @@ class UIStyle:
         "subheading": ("Helvetica", 16, "bold"),
         "body": ("Helvetica", 12),
         "button": ("Helvetica", 12, "bold"),
-        "input": ("Helvetica", 12)
+        "input": ("Helvetica", 12),
+        "calendar": ("Arial", 12)
     }
 
     @staticmethod
-    def apply_label_style(widget, text=""):
+    def apply_label_style(widget, text="", font="heading"):
         widget.config(
             text=text,
-            font=UIStyle.FONTS["heading"],
+            font=UIStyle.FONTS[font],
             bg=UIStyle.COLORS["bg"],
             fg=UIStyle.COLORS["fg"],
             padx=20,
@@ -31,11 +37,29 @@ class UIStyle:
         )
 
     @staticmethod
-    def apply_button_style(widget, text="", command=None):
+    def apply_calendar_style(calendar):
+        """Apply a modern UI theme to a tkcalendar widget."""
+        calendar.config(
+            background=UIStyle.COLORS["calendar_bg"],
+            foreground="white",
+            headersbackground=UIStyle.COLORS["calendar_header_bg"],
+            headersforeground="white",
+            bordercolor=UIStyle.COLORS["calendar_border"],
+            selectbackground=UIStyle.COLORS["calendar_selected_bg"],
+            selectforeground="white",
+            normalbackground=UIStyle.COLORS["calendar_bg"],
+            normalforeground="white",
+            weekendbackground=UIStyle.COLORS["calendar_bg"],
+            weekendforeground="white",
+            font=UIStyle.FONTS["calendar"],
+            locale="en_US"
+        )
+    @staticmethod
+    def apply_button_style(widget, text="", command=None, bg="primary"):
         widget.config(
             text=text,
             font=UIStyle.FONTS["button"],
-            bg=UIStyle.COLORS["primary"],
+            bg=UIStyle.COLORS[bg],
             fg="white",
             activebackground="#218C53",
             activeforeground="white",
