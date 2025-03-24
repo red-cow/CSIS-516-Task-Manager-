@@ -8,12 +8,11 @@ import sqlite3
 class TaskCalendarApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Task Calendar")
+        self.root.title("Calendar")
 
         # Database Connection
         self.conn = sqlite3.connect("TaskManager.db")
         self.cursor = self.conn.cursor()
-        self.create_table()
 
         # Calendar Frame
         self.frames = {"calendar": tk.Frame(root)}
@@ -45,19 +44,6 @@ class TaskCalendarApp:
         # Back Button
         btn_back = tk.Button(self.frames["calendar"], text="🔙 Back", command=self.go_back)
         btn_back.grid(row=4, column=0, columnspan=2, sticky="ew", pady=10)
-
-    def create_table(self):
-        """Creates the Task table if it doesn't exist."""
-        self.cursor.execute('''
-            CREATE TABLE IF NOT EXISTS Task (
-                ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                Title TEXT NOT NULL,
-                Description TEXT,
-                DueDate TEXT NOT NULL,
-                Priority TEXT NOT NULL CHECK (Priority IN ('High', 'Medium', 'Low'))
-            )
-        ''')
-        self.conn.commit()
 
     def highlight_task_dates(self):
         """Highlight due dates with priority colors in the calendar."""
@@ -156,9 +142,8 @@ class TaskCalendarApp:
             messagebox.showinfo("Success", "Task deleted successfully!")
 
     def go_back(self):
-        """Placeholder for going back to the home screen."""
-        print("Going back to home screen...")
-
+        print("Closing application...")
+        self.master.destroy()
 
 # Run the Application
 root = tk.Tk()

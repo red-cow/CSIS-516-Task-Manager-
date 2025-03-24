@@ -1,5 +1,6 @@
 import datetime
 import sqlite3
+from datetime import datetime
 class Database_Driver:
 
     def __init__(self):
@@ -7,9 +8,15 @@ class Database_Driver:
         self.cursor = self.conn.cursor()
 
     def CreateTask(self, priority, description, title, due_date, email):
-        if not all([priority.strip(), description.strip(), title.strip(), due_date.strip(), email.strip()]):
+        if not all([description.strip(), title.strip(), due_date.strip(), email.strip()]):
             print("Error: One or more fields are empty.")
-            return
+            return False
+        #date_object = datetime.strptime(due_date, "%m/%d/%y")
+        print(priority)
+        print(description)
+        print(title)
+        print(due_date)
+        print(email)
         try:
             self.cursor.execute("SELECT MAX(ID) FROM Task WHERE Email = ?", (email,))
             max_id = self.cursor.fetchone()[0]
@@ -32,6 +39,7 @@ class Database_Driver:
                             "VALUES (?, ?, ?, ?, ?, ?)"
                             ,(priority,id,description,title,due_date,email,))
         self.conn.commit()
+        return True
 
     def deleteTask(self, id):
         self.cursor.execute("DELETE FROM Task WHERE ID = ?", (id,))
@@ -63,6 +71,6 @@ class Database_Driver:
 
 
 db = Database_Driver()
-db.CreateTask("high","what's up","No way", "2025-04-10", "rmsack@svsu.edu")
+#db.CreateTask("high","what's up","No way", "2025-04-10", "rmsack@svsu.edu")
 db.GetTaskSingle("4rmsack@svsu.edu")
 db.GetTaskList("rmsack@svsu.edu")

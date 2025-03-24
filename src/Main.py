@@ -1,6 +1,8 @@
 # My other Python classes
 from Style import UIStyle
 from Driver import Database_Driver
+from CalendarView import TaskCalendarApp
+from CalendarPicker import PickDate
 #from Visibility import Show
 
 # Other Peoples Python Packages
@@ -8,8 +10,8 @@ from datetime import datetime
 from PIL import Image, ImageTk # pillow 
 import tkinter as tk
 from tkinter import ttk # gets you more tkinter controls
-from tkinter import Toplevel
 from tkcalendar import Calendar
+from tkinter import messagebox
 
 
 class TimeManager:
@@ -76,48 +78,59 @@ class TimeManager:
         # --- Create Task Screen ---
 
         self.lbl_task_name = tk.Label(self.frames["create_task"])
-        self.lbl_task_name.grid(row = 1, column=0, columnspan=4)
+        self.lbl_task_name.grid(row=0, column=0, columnspan=5, pady=(10, 5))
         UIStyle.apply_label_style(self.lbl_task_name, text="Create a Task")
 
+        # Labels for Title, Due Date, and Priority
         self.lbl_task_title = tk.Label(self.frames["create_task"])
-        self.lbl_task_title.grid(row = 2, column=0)
+        self.lbl_task_title.grid(row=1, column=0, sticky="w", padx=(10, 5), pady=(5, 2))
         UIStyle.apply_label_style(self.lbl_task_title, text="Title", font="subheading")
 
         self.lbl_due_date = tk.Label(self.frames["create_task"])
-        self.lbl_due_date.grid(row = 2, column=2)
+        self.lbl_due_date.grid(row=1, column=2, sticky="w", padx=(10, 5), pady=(5, 2))
         UIStyle.apply_label_style(self.lbl_due_date, text="Due Date", font="subheading")
 
         self.lbl_priority = tk.Label(self.frames["create_task"])
-        self.lbl_priority.grid(row=2, column=3)
+        self.lbl_priority.grid(row=1, column=4, sticky="w", padx=(10, 5), pady=(5, 2))
         UIStyle.apply_label_style(self.lbl_priority, text="Priority", font="subheading")
 
-        self.txt_task_title = tk.Text(self.frames["create_task"])
-        self.txt_task_title.grid(row=3, column=0, columnspan = 2)
+        # Title Textbox
+        self.txt_task_title = tk.Text(self.frames["create_task"], height=1, width=30)
+        self.txt_task_title.grid(row=2, column=0, columnspan=2, padx=10, pady=5, sticky="ew")
         self.txt_task_title.bind("<Tab>", self.focus_next_widget)
-        UIStyle.apply_entry_style(self.txt_task_title, width= 20)
+        UIStyle.apply_entry_style(self.txt_task_title)
 
-        self.btn_calanadar_pull_up = tk.Button(self.frames["create_task"])
-        self.btn_calanadar_pull_up.grid(row=3,column=2)
-        UIStyle.apply_button_style(self.btn_calanadar_pull_up, text="Select Due Date", command=self.open_date_picker)
+        # Due Date Selection Button
+        self.btn_calendar_pull_up = tk.Button(self.frames["create_task"])
+        self.btn_calendar_pull_up.grid(row=2, column=2, padx=10, pady=5)
+        UIStyle.apply_button_style(self.btn_calendar_pull_up, text="Select Due Date",
+                                   command=lambda: PickDate.open_date_picker(self))
 
-        self.txt_task_description = tk.Text(self.frames["create_task"])
-        self.txt_task_description.grid(row=4, column=0, columnspan=4, padx= 10)
-        UIStyle.apply_entry_style(self.txt_task_description, width=80, height =10)
+        # Label to Display Selected Due Date
+        self.date_label_task_created = tk.Label(self.frames["create_task"], text="No date selected")
+        self.date_label_task_created.grid(row=2, column=3, padx=10, pady=5)
+        UIStyle.apply_label_style(self.date_label_task_created, font="body")
 
+        # Priority Dropdown Menu
         self.priority_var = tk.StringVar()
         self.priority_dropdown = ttk.Combobox(
             self.frames["create_task"],
             textvariable=self.priority_var,
             values=["Low", "Medium", "High", "Critical"],
-            state="readonly"
+            state="readonly",
+            width=12
         )
-
-        self.priority_dropdown.grid(row=3, column=3, padx=10, pady=10)
+        self.priority_dropdown.grid(row=2, column=4, padx=10, pady=5)
         self.priority_dropdown.current(1)  # Default selection (Medium)
 
+        self.txt_task_description = tk.Text(self.frames["create_task"])
+        self.txt_task_description.grid(row=3, column=0, columnspan=5, padx=10, pady=5, sticky="ew")
+        UIStyle.apply_entry_style(self.txt_task_description, height=20, width=80)
+
+        # Create Task Button
         self.btn_create_new_task = tk.Button(self.frames["create_task"])
-        self.btn_create_new_task.grid(row=5, column=0, columnspan=4, padx= 10)
-        UIStyle.apply_button_style(self.btn_create_new_task, text="Create",command=self.create_task)
+        self.btn_create_new_task.grid(row=4, column=0, columnspan=5, padx=10, pady=10)
+        UIStyle.apply_button_style(self.btn_create_new_task, text="Create", command=self.create_task)
 
         # --- Calendar Screen (Second Frame) ---
 
@@ -209,37 +222,11 @@ class TimeManager:
 
 
 
-
-
-
-
-
         self.show_frame("login")
         self.update_time()
         self.db = Database_Driver()
 
     # background tasks
-
-    def open_date_picker(self, min):
-        """Creates a new window to select a date."""
-        date_window = Toplevel(self.root)
-        date_window.title("Select a Date")
-        if min:
-            cal = Calendar(date_window, selectmode="day", date_pattern="yyyy-mm-dd", mindate=datetime.today().date())
-        else:
-            cal = Calendar(date_window, selectmode="day", date_pattern="yyyy-mm-dd", maxdate=datetime.today().date())
-        UIStyle.apply_calendar_style(cal)
-        cal.pack(pady=20)
-
-        # Confirm Button
-        def set_date():
-            selected_date = cal.get_date()
-            self.date_label.config(text=f"Selected Date: {selected_date}")
-            date_window.destroy()
-
-        tk.Button(date_window, text="Confirm Date", command=set_date).pack(pady=10)
-
-
     def update_time(self):
         now = datetime.now()
         current_time = now.strftime("%B %d, %Y %I:%M %p")
@@ -313,6 +300,19 @@ class TimeManager:
         self.show_frame("login")
 
     def create_task(self):
+        date_text = self.date_label_task_created.cget("text")
+        date_value = date_text.split(": ")[1]
+        return_value = self.db.CreateTask(self.priority_var.get(), self.txt_task_description.get("1.0", "end-1c"), self.txt_task_title.get("1.0", "end-1c"), date_value,self.user[0])
+        if not(return_value):
+            tk.messagebox.showerror("Task not created", "Some fields were left blank")
+        else:
+            tk.messagebox.showinfo("Success", "Task Created Successfully")
+            self.txt_task_title.delete("1.0","end")
+            self.txt_task_description.delete("1.0", "end")
+            self.priority_dropdown.current(1)
+            self.show_frame("home")
+
+
 
     def show_create_account_fail_message(self, password_not_over_8, empty_fields):
         if hasattr(self, 'lbl_create_account_fail'):
@@ -338,6 +338,10 @@ class TimeManager:
 
         self.root.update()  # Force UI refresh
 
+    def launch_calendar_app(self):
+        rootCalendar = tk.Tk()
+        appCalendar = TaskCalendarApp(rootCalendar)
+        appCalendar.mainloop()
     def focus_next_widget(self, event):
         event.widget.tk_focusNext().focus()
         return "break"
