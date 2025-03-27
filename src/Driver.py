@@ -18,7 +18,9 @@ class Database_Driver:
         print(due_date)
         print(email)
         try:
-            self.cursor.execute("SELECT MAX(ID) FROM Task WHERE Email = ?", (email,))
+            self.cursor.execute(
+                "SELECT ID FROM Task WHERE Email = ? ORDER BY CAST(SUBSTR(ID, 1, INSTR(ID, '@') - 1) AS INTEGER) DESC LIMIT 1",
+                (email,))
             max_id = self.cursor.fetchone()[0]
             print(max_id)
 
@@ -60,8 +62,12 @@ class Database_Driver:
             return []
         self.cursor.execute("SELECT * FROM Task WHERE Email = ?", (email,))
         results = self.cursor.fetchall()
-        print(results)
         return results
+
+    def UpdateTask(self,new_description,new_title, new_priority, new_date, task_id):
+        self.cursor.execute("UPDATE Task SET Title = ?, Priority = ?, Description = ?, 'Due Date' = ?, WHERE ID = ?",
+                            (new_title, new_priority, new_description, new_date, task_id))
+        return self.conn.commit()
 
     def CreateUser(self):
         pass
@@ -70,7 +76,7 @@ class Database_Driver:
         return self.cursor.fetchone()
 
 
-db = Database_Driver()
+#db = Database_Driver()
 #db.CreateTask("high","what's up","No way", "2025-04-10", "rmsack@svsu.edu")
-db.GetTaskSingle("4rmsack@svsu.edu")
-db.GetTaskList("rmsack@svsu.edu")
+#db.GetTaskSingle("4rmsack@svsu.edu")
+#db.GetTaskList("rmsack@svsu.edu")

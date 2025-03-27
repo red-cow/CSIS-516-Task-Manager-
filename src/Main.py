@@ -46,28 +46,27 @@ class TimeManager:
         self.lbl_welcome = tk.Label(self.frames["home"])
         self.lbl_welcome.grid(row=1, column=0, columnspan=4, sticky="ew")
 
-        self.btn_create_task = tk.Button(self.frames["home"])
-        self.btn_create_task.grid(row=1, column=5, sticky="ew")
-        UIStyle.apply_button_style(self.btn_create_task, "+",command=lambda: self.show_frame("create_task"))
-
         self.lbl_date = tk.Label(self.frames["home"]) #, font=("Arial", 20), fg="white", bg="black", padx=20, pady=10)
         self.lbl_date.grid(row =2, column=0, columnspan=4, sticky="ew")
         UIStyle.apply_label_style(self.lbl_date)
 
-        self.icon = Image.open("Clock.jpg").resize((100,100))
-        self.icon = ImageTk.PhotoImage(self.icon)
-
-        self.btn_calandar_view = tk.Button(self.frames["home"], image=self.icon, command=lambda: self.show_frame("calendar"))
-        self.btn_calandar_view.grid(row=3, column=1)
+        self.btn_calandar_view = tk.Button(self.frames["home"], command=lambda: self.show_frame("calendar"))
+        self.btn_calandar_view.grid(row=4, column=1)
+        UIStyle.apply_button_style(self.btn_calandar_view, text="📅 Calendar View")
 
 
 
         self.btn_list_view = tk.Button(self.frames["home"], text= "view")
-        self.btn_list_view.grid(row= 3, column=3)
+        self.btn_list_view.grid(row= 4, column=3)
+        UIStyle.apply_button_style(self.btn_list_view, text="📜 List View")
 
-        self.btn_logout = tk.Button(self.frames["home"], text= "logout")
-        self.btn_logout.grid(row=4, column=3)
-        UIStyle.apply_button_style(self.btn_logout, text="Back To login", command= self.logout, bg="danger")
+        self.btn_create_task = tk.Button(self.frames["home"])
+        self.btn_create_task.grid(row=5, column=1, sticky="ew")
+        UIStyle.apply_button_style(self.btn_create_task, "➕ Add Task", command=lambda: self.show_frame("create_task"))
+
+        self.btn_logout = tk.Button(self.frames["home"],)
+        self.btn_logout.grid(row=6, column=2)
+        UIStyle.apply_button_style(self.btn_logout, text="🚶‍♂️ logout", command= self.logout, bg="danger")
 
 
 
@@ -129,16 +128,22 @@ class TimeManager:
 
         # Create Task Button
         self.btn_create_new_task = tk.Button(self.frames["create_task"])
-        self.btn_create_new_task.grid(row=4, column=0, columnspan=5, padx=10, pady=10)
+        self.btn_create_new_task.grid(row=4, column=1, columnspan=4, padx=10, pady=10)
         UIStyle.apply_button_style(self.btn_create_new_task, text="Create", command=self.create_task)
+
+        self.btn_to_home = tk.Button(self.frames["create_task"])
+        self.btn_to_home.grid(row=4, column=0)
+        UIStyle.apply_button_style(self.btn_to_home, text="🔙 Back", bg="danger", command=lambda: self.show_frame("home"))
 
         # --- Calendar Screen (Second Frame) ---
 
         lbl_calendar = tk.Label(self.frames["calendar"], text="Calendar View")
         lbl_calendar.grid(row =0, column=0, columnspan=4, sticky="ew")
 
-        btn_back = tk.Button(self.frames["calendar"], text="Back", command=lambda: self.show_frame("home"))#.grid(row =1 , column=0, columnspan=4, sticky="ew")
+        btn_back = tk.Button(self.frames["calendar"])
         btn_back.grid(row=1, column=0, columnspan=4, sticky="ew")
+        UIStyle.apply_button_style(btn_back, text="🔙 Back", bg="danger", command=lambda: self.show_frame("home"))
+
 
         # --- Login Screen () ---
 
@@ -221,8 +226,8 @@ class TimeManager:
         UIStyle.apply_button_style(self.btn_back, text="Back To login", command=self.logout, bg="danger")
 
 
-
-        self.show_frame("login")
+        self.show_frame("home")
+        #self.show_frame("login")
         self.update_time()
         self.db = Database_Driver()
 

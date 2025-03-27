@@ -146,6 +146,6 @@ class TaskCalendarApp:
         self.master.destroy()
 
 # Run the Application
-root = tk.Tk()
-app = TaskCalendarApp(root)
-root.mainloop()
+#root = tk.Tk()
+#app = TaskCalendarApp(root)
+#root.mainloop()
