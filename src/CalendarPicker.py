@@ -22,6 +22,6 @@ class PickDate:
             UIStyle.apply_label_style(self.date_label_task_created, text=f"Selected Date: {selected_date}", font="body")
             date_window.destroy()
 
-        btn_close =(tk.Button(date_window))
+        btn_close = tk.Button(date_window)
         btn_close.pack(pady=10)
         UIStyle.apply_button_style(btn_close, text="Confirm Date", command=set_date)

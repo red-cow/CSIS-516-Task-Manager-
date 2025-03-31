@@ -161,6 +161,10 @@ class TaskCalendarApp:
 
 
 # Run the Application
-root = tk.Tk()
-app = TaskCalendarApp(root)
-root.mainloop()
+#root = tk.Tk()
+#app = TaskCalendarApp(root)
+#root.mainloop()
+
+date = "2025-04-10"
+due_date = datetime.strptime(date, "%Y-%m-%d").strftime("%#m/%#d/%y")
+print(due_date)

@@ -55,7 +55,7 @@ class UIStyle:
             locale="en_US"
         )
     @staticmethod
-    def apply_button_style(widget, text="", command=None, bg="neutral"):
+    def apply_button_style(widget, text="", command=None, bg="neutral", width=10, height=1):
         default_bg = UIStyle.COLORS[bg]  # Store default background color
         hover_bg = "#5D6D7E"  # Slightly darker shade for hover effect
 
@@ -69,7 +69,9 @@ class UIStyle:
             relief="flat",
             padx=10,
             pady=5,
-            command=command
+            command=command,
+            width=width,  # Set width if provided
+            height=height  # Set height if provided
         )
 
         # Change color on hover

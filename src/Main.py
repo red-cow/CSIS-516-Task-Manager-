@@ -3,6 +3,7 @@ from Style import UIStyle
 from Driver import Database_Driver
 from CalendarView import TaskCalendarApp
 from CalendarPicker import PickDate
+from ListView import TaskGallery
 #from Visibility import Show
 
 # Other Peoples Python Packages
@@ -20,6 +21,7 @@ class TimeManager:
         self.root.title("Time Manager")
         self.root.geometry("1000x900")
         self.root.resizable(False,False)
+        self.db = Database_Driver()
 
         self.user = ["","","",""]
 
@@ -36,6 +38,8 @@ class TimeManager:
         self.frames["create_account"] = tk.Frame(self.container, bg=UIStyle.COLORS["bg"])
         self.frames["calendar"] = tk.Frame(self.container, bg=UIStyle.COLORS["bg"])
         self.frames["create_task"] = tk.Frame(self.container, bg=UIStyle.COLORS["bg"])
+        self.frames["list_view"] = tk.Frame(self.container, bg=UIStyle.COLORS["bg"])
+
 
         # --- Place all frames in the same position ---
         for frame in self.frames.values():
@@ -51,25 +55,26 @@ class TimeManager:
         UIStyle.apply_label_style(self.lbl_date)
 
         self.btn_calandar_view = tk.Button(self.frames["home"], command=lambda: self.show_frame("calendar"))
-        self.btn_calandar_view.grid(row=4, column=1)
-        UIStyle.apply_button_style(self.btn_calandar_view, text="📅 Calendar View")
+        self.btn_calandar_view.grid(row=4, column=1, padx=10, pady=5)  # Add padding to space out buttons
 
-
-
-        self.btn_list_view = tk.Button(self.frames["home"], text= "view")
-        self.btn_list_view.grid(row= 4, column=3)
-        UIStyle.apply_button_style(self.btn_list_view, text="📜 List View")
+        UIStyle.apply_button_style(self.btn_calandar_view, text="📅 Calendar View",width=12)
+        self.btn_list_view = tk.Button(self.frames["home"])
+        self.btn_list_view.grid(row=4, column=3, padx=10, pady=5)  # Add padding for spacing
+        UIStyle.apply_button_style(self.btn_list_view, text="📜 List View", command=self.launch_list_view, width=12)
 
         self.btn_create_task = tk.Button(self.frames["home"])
-        self.btn_create_task.grid(row=5, column=1, sticky="ew")
-        UIStyle.apply_button_style(self.btn_create_task, "➕ Add Task", command=lambda: self.show_frame("create_task"))
+        self.btn_create_task.grid(row=4, column=2, padx=10, pady=5, sticky="ew")  # Add padding and make it expand
+        UIStyle.apply_button_style(self.btn_create_task, "➕ Add Task", command=lambda: self.show_frame("create_task"), width=12)
 
-        self.btn_logout = tk.Button(self.frames["home"],)
-        self.btn_logout.grid(row=6, column=2)
-        UIStyle.apply_button_style(self.btn_logout, text="🚶‍♂️ logout", command= self.logout, bg="danger")
+        self.btn_logout = tk.Button(self.frames["home"])
+        self.btn_logout.grid(row=6, column=2, padx=10, pady=10)  # Add extra padding for the logout button
+        UIStyle.apply_button_style(self.btn_logout, text="🚶‍♂️ logout", command=self.logout, bg="danger", width=12)
 
+        # --- Calendar Frame (integrating TaskCalendarApp class) ---
+        self.calendar_frame = TaskCalendarApp(self.frames["calendar"], self)  # Embed the TaskCalendarApp here
 
-
+        # --- List View Frame (integrating TaskGallery class) ---
+        self.list_view_frame = TaskGallery(self.frames["list_view"], self)  # Embed the TaskGallery here
 
         self.app_icon = Image.open("FileIcon.png").resize((100,100))
         self.app_icon = ImageTk.PhotoImage(self.app_icon)
@@ -135,16 +140,6 @@ class TimeManager:
         self.btn_to_home.grid(row=4, column=0)
         UIStyle.apply_button_style(self.btn_to_home, text="🔙 Back", bg="danger", command=lambda: self.show_frame("home"))
 
-        # --- Calendar Screen (Second Frame) ---
-
-        lbl_calendar = tk.Label(self.frames["calendar"], text="Calendar View")
-        lbl_calendar.grid(row =0, column=0, columnspan=4, sticky="ew")
-
-        btn_back = tk.Button(self.frames["calendar"])
-        btn_back.grid(row=1, column=0, columnspan=4, sticky="ew")
-        UIStyle.apply_button_style(btn_back, text="🔙 Back", bg="danger", command=lambda: self.show_frame("home"))
-
-
         # --- Login Screen () ---
 
         self.lbl_login = tk.Label(self.frames["login"])
@@ -155,7 +150,7 @@ class TimeManager:
         self.lbl_email.grid(row=1, column=1,sticky="ew")
         UIStyle.apply_label_style(self.lbl_email, "Email:")
 
-        self.txt_email_ln = tk.Text(self.frames["login"])#, height=1, width=30)
+        self.txt_email_ln = tk.Text(self.frames["login"])
         self.txt_email_ln.grid(row=1, column=2)
         self.txt_email_ln.bind("<Tab>", self.focus_next_widget)
         UIStyle.apply_entry_style(self.txt_email_ln)
@@ -229,7 +224,6 @@ class TimeManager:
         self.show_frame("home")
         #self.show_frame("login")
         self.update_time()
-        self.db = Database_Driver()
 
     # background tasks
     def update_time(self):
@@ -317,8 +311,6 @@ class TimeManager:
             self.priority_dropdown.current(1)
             self.show_frame("home")
 
-
-
     def show_create_account_fail_message(self, password_not_over_8, empty_fields):
         if hasattr(self, 'lbl_create_account_fail'):
             self.lbl_create_account_fail.destroy()
@@ -343,10 +335,11 @@ class TimeManager:
 
         self.root.update()  # Force UI refresh
 
-    def launch_calendar_app(self):
-        rootCalendar = tk.Tk()
-        appCalendar = TaskCalendarApp(rootCalendar)
-        appCalendar.mainloop()
+    def launch_calendar_view(self):
+        self.show_frame("")
+    def launch_list_view(self):
+        self.show_frame("list_view")
+
     def focus_next_widget(self, event):
         event.widget.tk_focusNext().focus()
         return "break"

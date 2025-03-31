@@ -2,68 +2,64 @@ import tkinter as tk
 from tkinter import messagebox, simpledialog
 from tkcalendar import Calendar
 from datetime import datetime
-import sqlite3
+from Driver import Database_Driver
+from Style import UIStyle
 
 
 class TaskCalendarApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Calendar")
-
-        # Database Connection
-        self.conn = sqlite3.connect("TaskManager.db")
-        self.cursor = self.conn.cursor()
-
-        # Calendar Frame
-        self.frames = {"calendar": tk.Frame(root)}
-        self.frames["calendar"].pack(pady=20)
+    def __init__(self, parentFrame, parentObject):
+        self.root = parentObject.root
 
         # Calendar Label
-        lbl_calendar = tk.Label(self.frames["calendar"], text="📅 Calendar View", font=("Arial", 14, "bold"))
+        lbl_calendar = tk.Label(parentFrame, text="📅 Calendar View", font=("Arial", 14, "bold"))
         lbl_calendar.grid(row=0, column=0, columnspan=2, sticky="ew", pady=10)
 
         # Calendar Widget
-        self.cal = Calendar(self.frames["calendar"], selectmode="day", date_pattern="yyyy-MM-dd")
+        self.cal = Calendar(parentFrame, selectmode="day", date_pattern="yyyy-MM-dd")
         self.cal.grid(row=1, column=0, columnspan=2, pady=10)
 
         # Highlight Task Dates
-        self.highlight_task_dates()
+        self.highlight_task_dates(parentObject)
 
         # Buttons
-        btn_show_tasks = tk.Button(self.frames["calendar"], text="📜 Show Tasks", command=self.show_tasks)
+        btn_show_tasks = tk.Button(parentFrame, text="📜 Show Tasks", command=lambda :parentObject.show_frame("list_view"))#, command=self.show_tasks)
         btn_show_tasks.grid(row=2, column=0, pady=10)
 
-        btn_add_task = tk.Button(self.frames["calendar"], text="➕ Add Task", command=self.add_task)
+        btn_add_task = tk.Button(parentFrame, text="➕ Add Task", command=lambda :parentObject.show_frame("create_task"))#, command=self.add_task)
         btn_add_task.grid(row=2, column=1, pady=10)
 
         # Task Display Label
-        self.task_label = tk.Label(self.frames["calendar"], text="Tasks for Selected Date:\n", justify="left",
+        self.task_label = tk.Label(parentFrame, text="Tasks for Selected Date:\n", justify="left",
                                    font=("Arial", 12))
         self.task_label.grid(row=3, column=0, columnspan=2, pady=10)
 
         # Back Button
-        btn_back = tk.Button(self.frames["calendar"], text="🔙 Back", command=self.go_back)
+        btn_back = tk.Button(parentFrame, text="🔙 Back", command=lambda :parentObject.show_frame("home"))#, command=self.go_back)
         btn_back.grid(row=4, column=0, columnspan=2, sticky="ew", pady=10)
 
-    def highlight_task_dates(self):
-        """Highlight due dates with priority colors in the calendar."""
+    def highlight_task_dates(self, parentObject):
         try:
-            self.cursor.execute("SELECT DISTINCT due_date, Priority FROM Task WHERE due_date IS NOT NULL")
-            task_dates = self.cursor.fetchall()
+            task_dates = parentObject.db.HighlightTaskDate(email="rmsack@svsu.edu")
 
             # Define priority colors
-            priority_colors = {"High": "red", "Medium": "orange", "Low": "blue"}
+            priority_colors = {"Critical": "red", "High": "red", "Medium": "orange", "Low": "blue"}
 
-            # Configure tags for each priority level (avoid redundant calls in loop)
-            for priority, color in priority_colors.items():
-                if not self.cal.tag_has(f"task_{priority}"):
-                    self.cal.tag_config(f"task_{priority}", background=color, foreground="white")
-
-            # Iterate through tasks and add events
+            # Configure events based on priority
             for date, priority in task_dates:
                 try:
-                    parsed_date = datetime.strptime(date, "%Y-%m-%d")
-                    self.cal.calevent_create(parsed_date, "Task Due", f"task_{priority}")
+                    # Parse using strptime
+                    parsed_date = datetime.strptime(date, "%m/%d/%y").date()
+
+                    # Create event using 'tags' argument
+                    self.cal.calevent_create(
+                        parsed_date,  # Already a date instance
+                        "Task Due",
+                        tags=[f"task_{priority}"]
+                    )
+
+                    # Configure color for the priority
+                    self.cal.tag_config(f"task_{priority}", background=priority_colors.get(priority, "gray"))
+
                 except ValueError:
                     print(f"Skipping invalid date format: {date}")
 
@@ -71,7 +67,6 @@ class TaskCalendarApp:
             print(f"Error highlighting task dates: {e}")
 
     def show_tasks(self):
-        """Fetch and display tasks for the selected date."""
         selected_date = self.cal.get_date()
         self.cursor.execute("SELECT ID, Title, Description, Priority FROM Task WHERE DueDate = ?", (selected_date,))
         tasks = self.cursor.fetchall()
@@ -93,7 +88,6 @@ class TaskCalendarApp:
             btn_delete.grid()
 
     def add_task(self):
-        """Add a new task."""
         title = simpledialog.askstring("Add Task", "Enter task title:")
         if not title:
             return
@@ -113,7 +107,6 @@ class TaskCalendarApp:
         messagebox.showinfo("Success", "Task added successfully!")
 
     def edit_task(self, task_id):
-        """Edit an existing task."""
         new_title = simpledialog.askstring("Edit Task", "Enter new task title:")
         if not new_title:
             return
@@ -132,7 +125,6 @@ class TaskCalendarApp:
         messagebox.showinfo("Success", "Task updated successfully!")
 
     def delete_task(self, task_id):
-        """Delete a task."""
         confirm = messagebox.askyesno("Delete Task", "Are you sure you want to delete this task?")
         if confirm:
             self.cursor.execute("DELETE FROM Task WHERE ID = ?", (task_id,))

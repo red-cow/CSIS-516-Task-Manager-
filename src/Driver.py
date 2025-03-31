@@ -1,4 +1,3 @@
-import datetime
 import sqlite3
 from datetime import datetime
 class Database_Driver:
@@ -11,12 +10,8 @@ class Database_Driver:
         if not all([description.strip(), title.strip(), due_date.strip(), email.strip()]):
             print("Error: One or more fields are empty.")
             return False
-        #date_object = datetime.strptime(due_date, "%m/%d/%y")
-        print(priority)
-        print(description)
-        print(title)
-        print(due_date)
-        print(email)
+
+
         try:
             self.cursor.execute(
                 "SELECT ID FROM Task WHERE Email = ? ORDER BY CAST(SUBSTR(ID, 1, INSTR(ID, '@') - 1) AS INTEGER) DESC LIMIT 1",
@@ -47,7 +42,7 @@ class Database_Driver:
         self.cursor.execute("DELETE FROM Task WHERE ID = ?", (id,))
         self.conn.commit()
 
-    def GetTaskSingle(self,id):
+    def GetTaskSingle(self, id):
         if id.strip() == "":
             print("empty ID")
             return
@@ -56,18 +51,40 @@ class Database_Driver:
         print(results)
         return results
 
-    def GetTaskList(self, email):
+    def HighlightTaskDate(self, email):
+        self.cursor.execute("""SELECT DISTINCT "Due Date", Priority FROM Task WHERE "Due Date" IS NOT NULL AND Email = ?""", (email,) )
+        return self.cursor.fetchall()
+
+    def GetTaskList(self, email,sort_column="Due Date"):
         if email.strip() == "":
             print("no email provided")
             return []
-        self.cursor.execute("SELECT * FROM Task WHERE Email = ?", (email,))
+        if sort_column == "Title":
+            self.cursor.execute(
+                "SELECT * FROM Task WHERE Email = ? ORDER BY LOWER(Title) ASC",
+                (email,)
+            )
+        else:
+            self.cursor.execute(
+                """SELECT * FROM Task 
+                WHERE Email = ?
+                """,
+                (email,)
+            )
         results = self.cursor.fetchall()
         return results
 
-    def UpdateTask(self,new_description,new_title, new_priority, new_date, task_id):
-        self.cursor.execute("UPDATE Task SET Title = ?, Priority = ?, Description = ?, 'Due Date' = ?, WHERE ID = ?",
-                            (new_title, new_priority, new_description, new_date, task_id))
-        return self.conn.commit()
+    def UpdateTask(self, new_description, new_title, new_priority, new_date, task_id):
+        with sqlite3.connect("TaskManager.db") as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "UPDATE Task SET Title = ?, Priority = ?, Description = ?, 'Due Date' = ? WHERE ID = ?",
+                (new_title, new_priority, new_description, new_date, task_id)
+            )
+            conn.commit()
+
+            print("Task updated successfully")
+
 
     def CreateUser(self):
         pass
