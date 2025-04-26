@@ -1,3 +1,4 @@
 # created by virtualenv automaticallyS
 __pycache__/
 *.pyc
+src/.env

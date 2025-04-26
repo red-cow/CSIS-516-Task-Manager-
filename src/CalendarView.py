@@ -22,9 +22,9 @@ class TaskCalendarApp:
         lbl_calendar.grid(row=0, column=0, columnspan=2, sticky="ew", pady=10)
         UIStyle.apply_label_style(lbl_calendar, text="📅 Calendar View", font="heading")
 
-        lbl_veiw = tk.Label(parentFrame)  #, text="📅 Calendar View", font=("Arial", 14, "bold"))
-        lbl_veiw.grid(row=0, column=2, columnspan=2, sticky="ew", pady=10)
-        UIStyle.apply_label_style(lbl_veiw, text="Selected Task", font="heading")
+        lbl_selected = tk.Label(parentFrame)  #, text="📅 Calendar View", font=("Arial", 14, "bold"))
+        lbl_selected.grid(row=0, column=2, columnspan=2, sticky="ew", pady=10)
+        UIStyle.apply_label_style(lbl_selected, text="Selected Task", font="heading")
 
         # Calendar Widget
         self.cal = Calendar(parentFrame, selectmode="day", date_pattern="M/D/YY")
@@ -76,6 +76,7 @@ class TaskCalendarApp:
     def highlight_task_dates(self, parentObject):
         try:
             task_dates = parentObject.db.HighlightTaskDate(email=parentObject.user[0])
+            print(task_dates)
 
             # Define priority colors
             priority_colors = {
@@ -240,9 +241,9 @@ class TaskCalendarApp:
 
     def on_mouse_wheel(self, event):
         if event.delta > 0:
-            self.canvas.yview_scroll(-1, "units")  # Scroll up
+            self.task_canvas.yview_scroll(-1, "units")  # Scroll up
         else:
-            self.canvas.yview_scroll(1, "units")  # Scroll down
+            self.task_canvas.yview_scroll(1, "units")  # Scroll down
 
 # Run the Application
 #root = tk.Tk()

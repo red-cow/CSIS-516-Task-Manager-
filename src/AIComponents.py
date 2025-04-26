@@ -1,8 +1,10 @@
+import os
+from dotenv import load_dotenv
 from openai import OpenAI
 class ChatGPT:
     def __init__(self):
-        self.client = OpenAI( api_key="")
-
+        load_dotenv()
+        self.client = OpenAI( api_key= os.getenv("OPENAI_API_KEY"))
     def Recommendation(self, info):
         if(len(info) == 0):
             return "you have no tasks"
@@ -24,3 +26,5 @@ class ChatGPT:
             temp = temp[start_index:end_index]
             print(temp)
             return temp #f"{task_1_block} {task_2_block} {task_3_block}"
+
+

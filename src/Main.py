@@ -140,17 +140,21 @@ class TimeManager:
         self.priority_dropdown.grid(row=2, column=5, padx=10, pady=5)
         self.priority_dropdown.current(1)
 
+        self.lbl_description = tk.Label(self.frames["create_task"])
+        self.lbl_description.grid(row=3, column=1, columnspan=5, padx=10, pady=5, stick="ew")
+        UIStyle.apply_label_style(self.lbl_description, text="Description", font="subheading")
+
         self.txt_task_description = tk.Text(self.frames["create_task"])
-        self.txt_task_description.grid(row=3, column=1, columnspan=5, padx=10, pady=5, sticky="ew")
+        self.txt_task_description.grid(row=4, column=1, columnspan=5, padx=10, pady=5, sticky="ew")
         UIStyle.apply_entry_style(self.txt_task_description, height=20, width=80)
 
         # Create Task Button
         self.btn_create_new_task = tk.Button(self.frames["create_task"])
-        self.btn_create_new_task.grid(row=4, column=2, columnspan=4, padx=10, pady=10)
+        self.btn_create_new_task.grid(row=5, column=2, columnspan=4, padx=10, pady=10)
         UIStyle.apply_button_style(self.btn_create_new_task, text="Create", command=self.create_task)
 
         self.btn_to_home = tk.Button(self.frames["create_task"])
-        self.btn_to_home.grid(row=4, column=1)
+        self.btn_to_home.grid(row=5, column=1)
         UIStyle.apply_button_style(self.btn_to_home, text="🔙 Back", bg="danger", command=lambda: self.show_frame("home"))
 
         # --- Login Screen () ---
@@ -362,6 +366,8 @@ class TimeManager:
         self.txt_email_ca.delete("1.0", "end")
         self.txt_name.delete("1.0", "end")
         self.txt_password_ca.delete(0, "end")
+        UIStyle.apply_label_style(self.lbl_ai_recomendation, text="AI generating response....", font="body",
+                                  max_width=500) #removes the last users AI response to avoid confusion while the new one loads
         self.show_frame("login")
 
     def create_task(self):
