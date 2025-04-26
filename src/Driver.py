@@ -1,5 +1,4 @@
 import sqlite3
-from datetime import datetime
 class Database_Driver:
 
     def __init__(self):
@@ -48,7 +47,14 @@ class Database_Driver:
             return
         self.cursor.execute("SELECT * FROM Task WHERE ID = ?", (id,))
         results = self.cursor.fetchone()
-        print(results)
+        return results
+    def GetTaskByDate(self, date, email):
+        if date.strip() == "":
+            print("empty date")
+            return
+
+        self.cursor.execute("""SELECT * FROM Task WHERE "Due Date" = ?  AND Email = ?""", (date, email))
+        results = self.cursor.fetchall()
         return results
 
     def HighlightTaskDate(self, email):

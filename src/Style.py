@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 class UIStyle:
     COLORS = {
         "bg": "#2C3E50",
@@ -23,19 +24,23 @@ class UIStyle:
         "body": ("Helvetica", 12),
         "button": ("Helvetica", 12, "bold"),
         "input": ("Helvetica", 12),
-        "calendar": ("Arial", 12)
+        "calendar": ("Arial", 12),
+        "small": ("Helvetica", 6)
     }
 
     @staticmethod
-    def apply_label_style(widget, text="", font="heading"):
-        widget.config(
-            text=text,
-            font=UIStyle.FONTS[font],
-            bg=UIStyle.COLORS["bg"],
-            fg=UIStyle.COLORS["fg"],
-            padx=20,
-            pady=10
-        )
+    def apply_label_style(widget, text="", font="heading", max_width=None):
+        config = {
+            "text": text,
+            "font": UIStyle.FONTS[font],
+            "bg": UIStyle.COLORS["bg"],
+            "fg": UIStyle.COLORS["fg"],
+            "padx": 20,
+            "pady": 10
+        }
+        if max_width is not None:
+            config["wraplength"] = max_width
+        widget.config(**config)
 
     @staticmethod
     def apply_calendar_style(calendar):
@@ -96,3 +101,28 @@ class UIStyle:
         elif isinstance(widget, tk.Text):
             widget.config(height=height, width=width)  # Height applies to Text
             widget.insert("1.0", placeholder)
+
+    @staticmethod
+    def apply_combobox_style(widget, textvar, width=12, bg="neutral"):
+        style =ttk.Style()
+
+        style_name = f"{bg}.TCombobox"
+
+        default_bg = UIStyle.COLORS[bg]
+
+        # Configure style
+        style.configure(
+            style_name,
+            font=UIStyle.FONTS["body"],
+            fieldbackground=default_bg,
+            background=default_bg,
+            foreground="white",
+            padding=5
+        )
+
+        # Apply style to the combobox
+        widget.config(
+            width=width,
+            style=style_name,
+            textvariable=textvar
+        )

@@ -165,6 +165,23 @@ class TaskCalendarApp:
 #app = TaskCalendarApp(root)
 #root.mainloop()
 
-date = "2025-04-10"
-due_date = datetime.strptime(date, "%Y-%m-%d").strftime("%#m/%#d/%y")
-print(due_date)
+class A:
+    def __init__(self):
+        self.value = 0
+    def upadate_value(self):
+        self.value = 12
+
+class B:
+    def __init__(self, a_instance):
+        self.a = a_instance
+
+    def update_value(self):
+        self.a.value += 10  # 👈 updates value inside class A
+
+# Usage
+a = A()
+b = B(a)
+
+print(a.value)  # 0
+a.upadate_value()
+print(b.a.value)  # 10
