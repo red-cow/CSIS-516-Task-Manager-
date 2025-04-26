@@ -34,8 +34,10 @@ by using different **Threads** to ensure the user can use the app while the API 
 4. Right-click the file, then click keep
 ![img.png](img.png)
 5. Click Show More, then click Keep anyways
+
 ![img_1.png](img_1.png)
 6. Now the app is ready to use (:
 
 ## YouTube
 Follow this link to see how the application is used
+https://youtu.be/UYHt0nz5NwM
