@@ -1,9 +1,47 @@
+import os
+import sys
 import sqlite3
 class Database_Driver:
 
     def __init__(self):
-        self.conn = sqlite3.connect("TaskManager.db")
+        if getattr(sys, 'frozen', False):
+            # Running from PyInstaller bundle
+            base_path = os.path.dirname(sys.executable)
+        else:
+            # Running from source
+            base_path = os.path.dirname(__file__)
+
+        print(base_path)
+        db_path = os.path.join(base_path, "TaskManager.db")
+        print(base_path)
+        self.conn = sqlite3.connect(db_path)
         self.cursor = self.conn.cursor()
+        self.create_tables_if_not_exist()
+
+    def create_tables_if_not_exist(self):
+        # Create User table if it doesn't exist
+        self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS User (
+                    Email TEXT NOT NULL UNIQUE PRIMARY KEY,
+                    Name TEXT NOT NULL,
+                    "Date of Brith" DATE,
+                    Password VARCHAR(30) NOT NULL CHECK (LENGTH(Password) >= 8)
+                );
+        """)
+
+        # Create Task table if it doesn't exist
+        self.cursor.execute("""
+                CREATE TABLE IF NOT EXISTS Task (
+                    Priority TEXT NOT NULL,
+                     ID TEXT NOT NULL UNIQUE PRIMARY KEY,
+                    Description TEXT,
+                    Title TEXT NOT NULL,
+                    "Due Date" DATE,
+                    Email TEXT NOT NULL,
+                    FOREIGN KEY (Email) REFERENCES User(Email)
+                );
+        """)
+        self.conn.commit()
 
     def CreateTask(self, priority, description, title, due_date, email):
         if not all([description.strip(), title.strip(), due_date.strip(), email.strip()]):
@@ -92,14 +130,14 @@ class Database_Driver:
             print("Task updated successfully")
 
 
-    def CreateUser(self):
-        pass
+    def CreateUser(self, email, name, dob, password):
+        self.cursor.execute("INSERT INTO User (Email, Name, 'Date of Brith', Password) VALUES (?, ?, ?, ?)",
+                            (email, name, dob, password))
+        self.conn.commit()
+
+        self.cursor.execute("SELECT * FROM User WHERE Email = ?", (email,))
+        return self.cursor.fetchone()
     def GetUser(self, email):
         self.cursor.execute("SELECT * FROM User WHERE Email = ?", (email,))
         return self.cursor.fetchone()
 
-
-#db = Database_Driver()
-#db.CreateTask("high","what's up","No way", "2025-04-10", "rmsack@svsu.edu")
-#db.GetTaskSingle("4rmsack@svsu.edu")
-#db.GetTaskList("rmsack@svsu.edu")

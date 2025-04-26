@@ -1,12 +1,14 @@
 # My other Python classes
-from Style import UIStyle
-from Driver import Database_Driver
-from CalendarView import TaskCalendarApp
-from CalendarPicker import PickDate
-from ListView import TaskGallery
-from AIComponents import ChatGPT
+from src.Style import UIStyle
+from src.Driver import Database_Driver
+from src.CalendarView import TaskCalendarApp
+from src.CalendarPicker import PickDate
+from src.ListView import TaskGallery
+from src.AIComponents import ChatGPT
 
 # Other Peoples Python Packages
+import os
+import sys
 from datetime import datetime
 from PIL import Image, ImageTk # pillow 
 import tkinter as tk
@@ -86,7 +88,15 @@ class TimeManager:
         self.btn_logout.grid(row=7, column=3, padx=10, pady=10)  # Add extra padding for the logout button
         UIStyle.apply_button_style(self.btn_logout, text="🚶‍♂️ logout", command=self.logout, bg="danger", width=12)
 
-        self.app_icon = Image.open("FileIcon.png").resize((100,100))
+        if getattr(sys, 'frozen', False):
+            # If running as a PyInstaller bundle
+            base_path = sys._MEIPASS
+        else:
+            # Running in a normal Python environment
+            base_path = os.path.dirname(__file__)
+
+        icon_path = os.path.join(base_path, "FileIcon.png")
+        self.app_icon = Image.open(icon_path).resize((100, 100))
         self.app_icon = ImageTk.PhotoImage(self.app_icon)
         self.root.iconphoto(True, self.app_icon)
         # --- Create Task Screen ---
@@ -342,12 +352,7 @@ class TimeManager:
             self.show_create_account_fail_message(password_under_8_char, empty_fields)
         else:
             try:
-                self.cursor.execute("INSERT INTO User (Email, Name, 'Date of Brith', Password) VALUES (?, ?, ?, ?)",
-                                    (email, name, dob, password))
-                self.conn.commit()
-
-                self.cursor.execute("SELECT * FROM User WHERE Email = ?", (email,))
-                result = self.cursor.fetchone()
+                result = self.db.CreateUser(email, name, dob, password)
                 print(result)
                 self.user = result
                 self.txt_name.delete("1.0", "end")
@@ -355,6 +360,9 @@ class TimeManager:
                 self.txt_password_ca.delete(0, "end")
 
                 UIStyle.apply_label_style(self.lbl_welcome, text=f"Welcome {self.user[1]}")
+                temp = self.db.GetTaskList(self.user[0])
+                threading.Thread(target=lambda: self.users_recommendation(temp), daemon=True).start()
+
                 self.show_frame("home")
             except Exception as e:
                 print(e)
@@ -368,6 +376,12 @@ class TimeManager:
         self.txt_password_ca.delete(0, "end")
         UIStyle.apply_label_style(self.lbl_ai_recomendation, text="AI generating response....", font="body",
                                   max_width=500) #removes the last users AI response to avoid confusion while the new one loads
+        if hasattr(self, 'lbl_login_fail'):
+            self.lbl_login_fail.destroy()
+
+        if hasattr(self, 'lbl_create_account_fail'):
+            self.lbl_create_account_fail.destroy()
+
         self.show_frame("login")
 
     def create_task(self):

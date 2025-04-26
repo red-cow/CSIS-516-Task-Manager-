@@ -1,9 +1,9 @@
 import tkinter as tk
 from tkinter import messagebox, simpledialog, ttk
-from CalendarPicker import PickDate
+from src.CalendarPicker import PickDate
 from tkcalendar import Calendar
 from datetime import datetime
-from Style import UIStyle
+from src.Style import UIStyle
 
 
 class TaskCalendarApp:
@@ -85,6 +85,10 @@ class TaskCalendarApp:
                 "Medium": "#FFD700",  # Strong Yellow (Gold)
                 "Low": "#ADD8E6"  # Light Blue (classic)
             }
+
+            for event_id in self.cal.get_calevents():
+                self.cal.calevent_remove(event_id)
+
             # Configure events based on priority
             for date, priority in task_dates:
                 try:

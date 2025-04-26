@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import datetime
-from CalendarPicker import PickDate
-from Style import UIStyle
+from src.CalendarPicker import PickDate
+from src.Style import UIStyle
 
 
 class TaskGallery:
