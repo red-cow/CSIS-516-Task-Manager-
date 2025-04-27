@@ -8,21 +8,23 @@ from src.Style import UIStyle
 
 class TaskCalendarApp:
 
-    def main(self, parentFrame, parentObject):
-        self.root = parentObject.root
-        self.object = parentObject
-        self.frame = parentFrame
+    def main(self, parentFrame, parentObject):  # main method called through the instructor
+        self.root = parentObject.root  # a reference to the apps main objects root
+        self.object = parentObject  # a reference to the apps main objects
+        self.frame = parentFrame  # a reference to the apps home frame
         self.pointer = 0
 
+        #  centers the frame
         parentFrame.grid_columnconfigure(0, weight=1)
         parentFrame.grid_columnconfigure(6, weight=1)
 
         # Calendar Label
-        lbl_calendar = tk.Label(parentFrame)  #, text="📅 Calendar View", font=("Arial", 14, "bold"))
+        lbl_calendar = tk.Label(parentFrame)
         lbl_calendar.grid(row=0, column=0, columnspan=2, sticky="ew", pady=10)
         UIStyle.apply_label_style(lbl_calendar, text="📅 Calendar View", font="heading")
 
-        lbl_selected = tk.Label(parentFrame)  #, text="📅 Calendar View", font=("Arial", 14, "bold"))
+        # Selected task Label
+        lbl_selected = tk.Label(parentFrame)
         lbl_selected.grid(row=0, column=2, columnspan=2, sticky="ew", pady=10)
         UIStyle.apply_label_style(lbl_selected, text="Selected Task", font="heading")
 
@@ -35,12 +37,12 @@ class TaskCalendarApp:
         self.highlight_task_dates(parentObject)
 
         # Buttons
-        btn_show_tasks = tk.Button(parentFrame)  #, command=self.show_tasks)
+        btn_show_tasks = tk.Button(parentFrame)
         btn_show_tasks.grid(row=5, column=0, pady=10)
         UIStyle.apply_button_style(btn_show_tasks, text="📜 Show Tasks",
                                    command=lambda: parentObject.show_frame("list_view"))
 
-        btn_add_task = tk.Button(parentFrame)  #, command=self.add_task)
+        btn_add_task = tk.Button(parentFrame)
         btn_add_task.grid(row=5, column=1, pady=10)
         UIStyle.apply_button_style(btn_add_task, text="➕ Add Task",
                                    command=lambda: parentObject.show_frame("create_task"))
@@ -73,8 +75,9 @@ class TaskCalendarApp:
     def __init__(self, parentFrame, parentObject):
         self.main(parentFrame, parentObject)
 
-    def highlight_task_dates(self, parentObject):
+    def highlight_task_dates(self, parentObject):  # highlights dates on the calendars
         try:
+            # a list of the dates that needs to be highlighted
             task_dates = parentObject.db.HighlightTaskDate(email=parentObject.user[0])
             print(task_dates)
 
@@ -86,6 +89,8 @@ class TaskCalendarApp:
                 "Low": "#ADD8E6"  # Light Blue (classic)
             }
 
+            # removes all previous
+            # needed for when a user makes a change or clears a task
             for event_id in self.cal.get_calevents():
                 self.cal.calevent_remove(event_id)
 
@@ -130,8 +135,9 @@ class TaskCalendarApp:
                 max_width=380
             )
 
+        # goes through each task for a given day and displays it in the canvas as a card
         for i, task in enumerate(tasks):
-            task_id = task[1]
+            task_id = task[1] # gets task id
             print(task_id)
 
             # Task Label
@@ -164,22 +170,25 @@ class TaskCalendarApp:
                 bg="danger"
             )
 
-            # 🔹 Breaker line
+            # Breaker line
             separator = ttk.Separator(self.task_inner_frame, orient="horizontal")
             separator.grid(row=i * 4 + 2, column=0, columnspan=2, sticky="ew", pady=10)
 
     def edit_task2(self, task):
+        # gets attributes of a given task
         priority = task[0]
         task_id = task[1]
         description = task[2]
         title = task[3]
         due_date = task[4]
 
+        # creates the edit window and configures the window
         edit_window = tk.Toplevel(self.root)
         edit_window.title("Edit Task")
         edit_window.configure(bg=UIStyle.COLORS["bg"])
         edit_window.resizable(False, False)
 
+        # Label and text box for title
         lbl_title = tk.Label(edit_window)
         lbl_title.grid(row=0, column=0, padx=5, pady=5)
         UIStyle.apply_label_style(lbl_title, text="Title:", font="subheading")
@@ -187,6 +196,7 @@ class TaskCalendarApp:
         title_text.grid(row=0, column=1, padx=5, pady=5)
         title_text.insert(tk.END, title)
 
+        # Label and text box for description
         lbl_description = tk.Label(edit_window)
         lbl_description.grid(row=1, column=0, padx=5, pady=5)
         UIStyle.apply_label_style(lbl_description, text="Description:", font="subheading")
@@ -194,6 +204,7 @@ class TaskCalendarApp:
         description_text.grid(row=1, column=1, padx=5, pady=5)
         description_text.insert(tk.END, description)
 
+        # Label and text box for priority
         lbl_priority = tk.Label(edit_window)
         lbl_priority.grid(row=2, column=0, padx=5, pady=5)
         UIStyle.apply_label_style(lbl_priority, text="Priority:", font="subheading")
@@ -203,6 +214,7 @@ class TaskCalendarApp:
                                          values=["Low", "Medium", "High", "Critical"], state="readonly")
         priority_dropdown.grid(row=2, column=1, padx=5, pady=5)
 
+        # a button to open the date picker to pick a due date
         btn_calendar_pull_up = tk.Button(edit_window)
         btn_calendar_pull_up.grid(row=3, column=0, padx=10, pady=5)
         UIStyle.apply_button_style(btn_calendar_pull_up, text="Select Due Date",
@@ -212,44 +224,39 @@ class TaskCalendarApp:
         UIStyle.apply_label_style(self.date_label_task_created, text=f"Current: {due_date}", font="body")
         self.date_label_task_created.grid(row=3, column=1, padx=10)
 
-        def save_changes():
+        def save_changes():  # saves all changes made
+            # gets the values from all the texts boxes
             new_title = title_text.get("1.0", "end-1c").strip()
             new_priority = priority_var.get().strip()
             new_description = description_text.get("1.0", "end-1c").strip()
             date_value = self.date_label_task_created.cget("text").split(": ")[1]
 
-            if new_title:
-                self.object.db.UpdateTask(new_description, new_title, new_priority, date_value, task_id)
+            if new_title: # checks to make sure the user didn't delete the title
+                self.object.db.UpdateTask(new_description, new_title, new_priority, date_value, task_id)  # updats task
                 messagebox.showinfo("Success", "Task updated successfully!")
                 edit_window.destroy()
                 self.show_tasks(self.object, self.frame)  # Refresh UI
-                self.highlight_task_dates(self.object)
-            else:
+                self.highlight_task_dates(self.object)  # Refreshes calendar
+            else: # users deleted the title
                 messagebox.showerror("Fail", "Title was removed")
 
+        # sets up the save button
         save_btn = tk.Button(edit_window)
         save_btn.grid(row=4, column=0, columnspan=2, pady=10)
         UIStyle.apply_button_style(save_btn, text="Save Changes", command=save_changes, bg="primary")
 
     def delete_task(self, task):
         confirm = messagebox.askyesno("Delete Task", "Are you sure you want to delete this task?")
-        if confirm:
+        if confirm: # if messagebox was a yes then delete the task
             self.object.db.deleteTask(task[1])
+            # refresh the canvas of tasks and the calendar
             self.show_tasks(self.object, self.frame)
             self.highlight_task_dates(self.object)
+            # show that this action was successful
             messagebox.showinfo("Success", "Task deleted successfully!")
-
-    def go_back(self):
-        print("Closing application...")
-        self.master.destroy()
 
     def on_mouse_wheel(self, event):
         if event.delta > 0:
             self.task_canvas.yview_scroll(-1, "units")  # Scroll up
         else:
             self.task_canvas.yview_scroll(1, "units")  # Scroll down
-
-# Run the Application
-#root = tk.Tk()
-#app = TaskCalendarApp(root)
-#root.mainloop()

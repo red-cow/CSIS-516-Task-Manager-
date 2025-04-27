@@ -6,16 +6,16 @@ from src.Style import UIStyle
 
 
 class TaskGallery:
-    def main(self, parentFrame, parentObject):
-        self.root = parentObject.root
-        self.object = parentObject
+    def main(self, parentFrame, parentObject):  # main method called through the instructor
+        self.root = parentObject.root  # a reference to the apps main objects root
+        self.object = parentObject  # a reference to the apps main objects
         self.priority_order = {"Critical": 1, "High": 2, "Medium": 3, "Low": 4}
 
-        lbl_title = tk.Label(parentFrame)
+        lbl_title = tk.Label(parentFrame) # title saying look at your tasks
         lbl_title.grid(row=0, column=1, padx=10, pady=5, stick="w")
         UIStyle.apply_label_style(lbl_title, text="Look at Your tasks")
 
-        lbl_sort_by = tk.Label(parentFrame)
+        lbl_sort_by = tk.Label(parentFrame) # label letting people know it's a sort by dropdown
         lbl_sort_by.grid(row=0, column=1, padx=10, pady=5, stick="e")
         UIStyle.apply_label_style(lbl_sort_by, text="Sort By:", font="body")
 
@@ -34,18 +34,18 @@ class TaskGallery:
 
         sort_dropdown.grid(row=0, column=2, pady=5)
         # UIStyle.apply_combobox_style(sort_dropdown, self.sort_var, bg="neutral")
-        sort_dropdown.bind("<<ComboboxSelected>>", lambda event: self.load_tasks())
+        sort_dropdown.bind("<<ComboboxSelected>>", lambda event: self.load_tasks()) # reloads the tasks to match the order by dropdown
 
-        btn_cal = tk.Button(parentFrame)
+        btn_cal = tk.Button(parentFrame) # takes you to the calendar page
         UIStyle.apply_button_style(btn_cal, text="📅 Cal View", command=lambda: parentObject.show_frame("calendar"))
         btn_cal.grid(row=0, column=3, padx=10, pady=5, sticky='e')
 
-        btn_back = tk.Button(parentFrame)
+        btn_back = tk.Button(parentFrame) # button takes you to the home page
         UIStyle.apply_button_style(btn_back, text="🔙 Home", bg="danger",
                                    command=lambda: parentObject.show_frame("home"))
         btn_back.grid(row=0, column=4, columnspan=2, padx=30, pady=5, sticky='e')
 
-        parentFrame.grid_rowconfigure(1, weight=1)
+        parentFrame.grid_rowconfigure(1, weight=1) # center the page
         parentFrame.grid_columnconfigure(0, weight=1)
 
         # Canvas and Scrollbar Frame
@@ -70,8 +70,6 @@ class TaskGallery:
 
         # Configure Canvas
         self.canvas.configure(yscrollcommand=scrollbar.set)
-        #self.canvas.bind("<Configure>", lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all")))
-
 
         # Create another frame inside the Canvas
         self.task_frame = tk.Frame(self.canvas, bg=UIStyle.COLORS["bg"])
@@ -87,7 +85,7 @@ class TaskGallery:
 
         # Load and display tasks
         self.load_tasks()
-    def __init__(self, parentFrame, parentObject):
+    def __init__(self, parentFrame, parentObject): # called each time the list view page is opened
         self.main(parentFrame, parentObject)
 
 
@@ -98,13 +96,14 @@ class TaskGallery:
 
         # Fetch tasks from SQLite sorted by Due Date
         tasks = self.object.db.GetTaskList(self.object.user[0], self.sort_var.get())
-        if self.sort_var.get() == "Due Date":
+        if self.sort_var.get() == "Due Date": # make sure it's formated right for due dates
             tasks = sorted(tasks, key=lambda x: datetime.strptime(x[4], "%m/%d/%y"))
-        elif self.sort_var.get() == "Priority":
+        elif self.sort_var.get() == "Priority": # make sure it's formated right for priority
            tasks = sorted(tasks, key=lambda x: self.priority_order.get(x[0].capitalize(), 5))
 
 
         for task in tasks:
+            # get information for each task
             priority = task[0]
             task_id = task[1]
             description = task[2]
@@ -132,9 +131,11 @@ class TaskGallery:
             UIStyle.apply_label_style(priority_lbl, text=f"Priority: {priority}", font="body")
             priority_lbl.pack(anchor="w")
 
+            # frame for the buttons
             btn_frame = tk.Frame(task_card, bg=UIStyle.COLORS["bg"])
             btn_frame.pack(anchor="e", pady=5)
 
+            # delete and edit buttons
             edit_btn = tk.Button(btn_frame)
             UIStyle.apply_button_style(edit_btn,text="Edit", command=lambda t=task: self.edit_task(t), bg="primary")
             edit_btn.pack(side=tk.LEFT, padx=5)
@@ -144,17 +145,20 @@ class TaskGallery:
             delete_btn.pack(side=tk.LEFT, padx=5)
 
     def edit_task(self, task):
+        # opens the editing page for a given task
         priority = task[0]
         task_id = task[1]
         description = task[2]
         title = task[3]
         due_date = task[4]
 
+        # configures the new window
         edit_window = tk.Toplevel(self.root)
         edit_window.title("Edit Task")
         edit_window.configure(bg=UIStyle.COLORS["bg"])
         edit_window.resizable(False,False)
 
+        # Label and text box for title
         lbl_title = tk.Label(edit_window)
         lbl_title.grid(row=0, column=0, padx=5, pady=5)
         UIStyle.apply_label_style(lbl_title,text="Title:",font="subheading")
@@ -162,6 +166,7 @@ class TaskGallery:
         title_text.grid(row=0, column=1, padx=5, pady=5)
         title_text.insert(tk.END, title)
 
+        # Label and text box for description
         lbl_description = tk.Label(edit_window)
         lbl_description.grid(row=1, column=0, padx=5, pady=5)
         UIStyle.apply_label_style(lbl_description, text="Description:", font="subheading")
@@ -169,6 +174,7 @@ class TaskGallery:
         description_text.grid(row=1, column=1, padx=5, pady=5)
         description_text.insert(tk.END, description)
 
+        # Label and text box for the priority
         lbl_priority = tk.Label(edit_window)
         lbl_priority.grid(row=2, column=0, padx=5, pady=5)
         UIStyle.apply_label_style(lbl_priority, text="Priority:", font="subheading")
@@ -177,6 +183,7 @@ class TaskGallery:
                                          values=["Low", "Medium", "High", "Critical"], state="readonly")
         priority_dropdown.grid(row=2, column=1, padx=5, pady=5)
 
+        #button to open up the date picker for picking the due date
         btn_calendar_pull_up = tk.Button(edit_window)
         btn_calendar_pull_up.grid(row=3, column=0, padx=10, pady=5)
         UIStyle.apply_button_style(btn_calendar_pull_up, text="Select Due Date",
@@ -187,28 +194,30 @@ class TaskGallery:
         self.date_label_task_created.grid(row=3, column=1, padx=10)
 
 
-        def save_changes():
+        def save_changes(): # saves the new changes
             new_title = title_text.get("1.0", "end-1c").strip()
             new_priority = priority_var.get().strip()
             new_description = description_text.get("1.0", "end-1c").strip()
             date_value = self.date_label_task_created.cget("text").split(": ")[1]
 
-            if new_title:
-                self.object.db.UpdateTask(new_description,new_title,new_priority,date_value,task_id)
+            if new_title: # meaning the title textbox is not blank
+                self.object.db.UpdateTask(new_description,new_title,new_priority,date_value,task_id) # commits the update
                 messagebox.showinfo("Success", "Task updated successfully!")
-                edit_window.destroy()
+                edit_window.destroy() # closes the editing window
                 self.load_tasks()  # Refresh UI
-            else:
+            else: # no title meaning update fails
                 messagebox.showerror("Fail", "Title was removed")
 
+        # button to save the changes to the task
         save_btn = tk.Button(edit_window)
         save_btn.grid(row=4, column=0, columnspan=2, pady=10)
         UIStyle.apply_button_style(save_btn,text="Save Changes", command=save_changes, bg="primary")
 
-    def delete_task(self, task_id):
+    def delete_task(self, task_id): # deletes a given task
         confirm = messagebox.askyesno("Confirm", "Are you sure you want to delete this task?")
+        # if messagebox was confirmed
         if confirm:
-            self.object.db.deleteTask(task_id)
+            self.object.db.deleteTask(task_id)  # removed tasked
             messagebox.showinfo("Deleted", "Task removed successfully!")
             self.load_tasks()  # Refresh UI
 

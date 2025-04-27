@@ -36,6 +36,7 @@ by using different **Threads** to ensure the user can use the app while the API 
 5. Click Show More, then click Keep anyways
 
 ![img_1.png](img_1.png)
+
 6. Now the app is ready to use (:
 
 ## YouTube

@@ -4,19 +4,17 @@ import sqlite3
 class Database_Driver:
 
     def __init__(self):
-        if getattr(sys, 'frozen', False):
+        if getattr(sys, 'frozen', False): #see's if this is running on the exe or in pychram
             # Running from PyInstaller bundle
-            base_path = os.path.dirname(sys.executable)
+            base_path = os.path.dirname(sys.executable) # exe
         else:
             # Running from source
-            base_path = os.path.dirname(__file__)
+            base_path = os.path.dirname(__file__) #pycharm
 
-        print(base_path)
-        db_path = os.path.join(base_path, "TaskManager.db")
-        print(base_path)
-        self.conn = sqlite3.connect(db_path)
+        db_path = os.path.join(base_path, "TaskManager.db") # makes the db path dynamic depending on environment
+        self.conn = sqlite3.connect(db_path) # connects to db
         self.cursor = self.conn.cursor()
-        self.create_tables_if_not_exist()
+        self.create_tables_if_not_exist() #creates the table if this is the first instances of the db
 
     def create_tables_if_not_exist(self):
         # Create User table if it doesn't exist
@@ -43,8 +41,8 @@ class Database_Driver:
         """)
         self.conn.commit()
 
-    def CreateTask(self, priority, description, title, due_date, email):
-        if not all([description.strip(), title.strip(), due_date.strip(), email.strip()]):
+    def CreateTask(self, priority, description, title, due_date, email): # creates a task
+        if not all([description.strip(), title.strip(), due_date.strip(), email.strip()]): # see's if any fields are empty
             print("Error: One or more fields are empty.")
             return False
 
@@ -68,76 +66,76 @@ class Database_Driver:
         except Exception as e:
             print(e)
             id = "1" + email
-
+        # creates a new task object
         self.cursor.execute("INSERT INTO Task (Priority, ID, Description, Title, 'Due Date', Email) "
                             "VALUES (?, ?, ?, ?, ?, ?)"
                             ,(priority,id,description,title,due_date,email,))
         self.conn.commit()
         return True
 
-    def deleteTask(self, id):
+    def deleteTask(self, id): # deletes a task
         self.cursor.execute("DELETE FROM Task WHERE ID = ?", (id,))
         self.conn.commit()
 
-    def GetTaskSingle(self, id):
+    def GetTaskSingle(self, id): # gets a task based on it's id
         if id.strip() == "":
             print("empty ID")
             return
         self.cursor.execute("SELECT * FROM Task WHERE ID = ?", (id,))
         results = self.cursor.fetchone()
         return results
-    def GetTaskByDate(self, date, email):
+    def GetTaskByDate(self, date, email): # gets a list of task to a given user sorted by date
         if date.strip() == "":
             print("empty date")
             return
 
         self.cursor.execute("""SELECT * FROM Task WHERE "Due Date" = ?  AND Email = ?""", (date, email))
-        results = self.cursor.fetchall()
+        results = self.cursor.fetchall() # gets the list of task
         return results
 
-    def HighlightTaskDate(self, email):
+    def HighlightTaskDate(self, email): # gets all distinct dates of a users tasks to give to there calendar
         self.cursor.execute("""SELECT DISTINCT "Due Date", Priority FROM Task WHERE "Due Date" IS NOT NULL AND Email = ?""", (email,) )
         return self.cursor.fetchall()
 
-    def GetTaskList(self, email,sort_column="Due Date"):
+    def GetTaskList(self, email,sort_column="Due Date"): #gets a list of tasks from a given user but you can change the way they come sorted
         if email.strip() == "":
             print("no email provided")
             return []
-        if sort_column == "Title":
-            self.cursor.execute(
+        if sort_column == "Title": # if you want sorted by title
+            self.cursor.execute( # is special because it needs to be lower case to work correctly in sql
                 "SELECT * FROM Task WHERE Email = ? ORDER BY LOWER(Title) ASC",
                 (email,)
             )
         else:
-            self.cursor.execute(
+            self.cursor.execute( # any instance where you are not dealing with the title
                 """SELECT * FROM Task 
                 WHERE Email = ?
                 """,
                 (email,)
             )
-        results = self.cursor.fetchall()
+        results = self.cursor.fetchall() # gets list from the database
         return results
 
-    def UpdateTask(self, new_description, new_title, new_priority, new_date, task_id):
-        with sqlite3.connect("TaskManager.db") as conn:
-            cursor = conn.cursor()
-            cursor.execute(
+    def UpdateTask(self, new_description, new_title, new_priority, new_date, task_id): # updates a given task
+        with sqlite3.connect("TaskManager.db") as conn: # do to locking issues with updating we use a new temporay connection
+            cursor = conn.cursor() # temp cursor
+            cursor.execute( # update
                 "UPDATE Task SET Title = ?, Priority = ?, Description = ?, 'Due Date' = ? WHERE ID = ?",
                 (new_title, new_priority, new_description, new_date, task_id)
             )
-            conn.commit()
+            conn.commit() # a real commit to the database
 
-            print("Task updated successfully")
+            print("Task updated successfully") #temporay connection is closed
 
 
-    def CreateUser(self, email, name, dob, password):
+    def CreateUser(self, email, name, dob, password): # create a new user
         self.cursor.execute("INSERT INTO User (Email, Name, 'Date of Brith', Password) VALUES (?, ?, ?, ?)",
                             (email, name, dob, password))
         self.conn.commit()
 
-        self.cursor.execute("SELECT * FROM User WHERE Email = ?", (email,))
-        return self.cursor.fetchone()
-    def GetUser(self, email):
+        self.cursor.execute("SELECT * FROM User WHERE Email = ?", (email,)) # gets me the newly created user
+        return self.cursor.fetchone() # return the new created user
+    def GetUser(self, email): # get a user based on there email
         self.cursor.execute("SELECT * FROM User WHERE Email = ?", (email,))
         return self.cursor.fetchone()
 
